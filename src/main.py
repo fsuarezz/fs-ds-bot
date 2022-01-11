@@ -3,15 +3,15 @@ from asyncio import sleep,run
 from discord.ext import commands,tasks
 from play_cmd import YTDLSource,FFMPEG_OPTS
 from triggerword import checkForTriggers
+from dotenv.main import load_dotenv
 import os
-from dotenv import dotenv_values
+
 
 
 def main():
     bot = commands.Bot(command_prefix='!', description='Beep Boop')
     queue = []
-    temp = dotenv_values(".env")
-
+    load_dotenv()
 
     'EVENTS'
 
@@ -129,8 +129,8 @@ def main():
             await playNext(ctx)
 
     '--------'
-    bot.run(temp["DISCORD_TOKEN"])
-   # bot.run(os.getenv("DISCORD_TOKEN"))
+
+    bot.run(os.getenv("DISCORD_TOKEN"))
 
 
 if __name__ == '__main__':
