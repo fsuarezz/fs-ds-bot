@@ -33,7 +33,13 @@ class YTDLSource(discord.PCMVolumeTransformer):
     async def from_url(cls, url, *, loop=None, stream=False):
         loop = loop or asyncio.get_event_loop()
         data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=False))
-        if 'entries' in data:
-            # take first item from a playlist
-            data = data['entries'][0]
+        formatedUrl="https://youtu.be/"
+        if "=" in url:
+            start = url.index("=")
+            formatedUrl += url[start+1:start+12]
+            url=formatedUrl
+        if 'entries' not in data:
+            data = await loop.run_in_executor(None, lambda: ytdl.extract_info(f"ytsearch:{url}", download=False))
+        data = data['entries'][0]
         return {'url':data['formats'][0]['url'],'filename': data['title']}
+

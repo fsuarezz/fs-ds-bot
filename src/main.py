@@ -1,4 +1,7 @@
+import time
+
 import discord
+import asyncio
 from asyncio import sleep,run
 from discord.ext import commands,tasks
 from play_cmd import YTDLSource,FFMPEG_OPTS
@@ -26,6 +29,7 @@ def main():
         await checkForTriggers(msg, await bot.get_context(msg))
         await bot.process_commands(msg)
 
+
     '------'
 
 
@@ -39,13 +43,13 @@ def main():
                 channel = ctx.message.author.voice.channel
                 await channel.connect()
                 return True
-
+        else:
+            return True
 
     async def leave(ctx):
         voice_client = ctx.message.guild.voice_client
         if not (voice_client is None):
             await voice_client.disconnect()
-
 
     async def playNext(ctx):
         if len(queue) > 0:
@@ -58,10 +62,7 @@ def main():
             if not (voice_channel is None):
                 voice_channel.play(discord.FFmpegPCMAudio(
                     song['url'], **FFMPEG_OPTS), after=lambda e: run(playNext(ctx))
-                    )
-
-
-
+                       )
 
     'COMMANDS USE !'
 
@@ -85,9 +86,14 @@ def main():
                         queue.append(song)
                         await ctx.send('**Reproduciendo:** {}'.format(song['filename']))
                         await playNext(ctx)
+
+
                     # Recursive
                     else:
                         await ctx.send("Se agrego a la queue: " + song['filename'])
+                while voice_channel.is_playing():
+                    await asyncio.sleep(60)
+                await leave(ctx)
         except Exception as m:
             await ctx.send(m)
 
@@ -97,7 +103,6 @@ def main():
         voice_client = ctx.message.guild.voice_client
         if voice_client.is_playing():
             await voice_client.pause()
-            await ctx.send(":*")
         else:
             await ctx.send("The bot is not playing anything at the moment.")
 
@@ -116,6 +121,7 @@ def main():
         voice_client = ctx.message.guild.voice_client
         if voice_client.is_connected():
             queue.clear()
+            await ctx.send("Bye")
             await leave(ctx)
         else:
             await ctx.send("No estoy conectado a un canal de voz.")
