@@ -61,8 +61,7 @@ def main():
             # Recursive
             if not (voice_channel is None):
                 voice_channel.play(discord.FFmpegPCMAudio(
-                    song['url'], **FFMPEG_OPTS), after=lambda e: run(playNext(ctx))
-                       )
+                    song['url'], **FFMPEG_OPTS), )
 
     'COMMANDS USE !'
 
@@ -73,13 +72,15 @@ def main():
 
 
     @bot.command(name='play', help='Reproducir musica')
-    async def play(ctx, url):
+    async def play(ctx, *url):
         try:
             connect = await join(ctx)
             if connect:
                 server = ctx.message.guild
                 voice_channel = server.voice_client
                 async with ctx.typing():
+                    url = ' '.join(url)
+                    print(url)
                     song = await YTDLSource.from_url(url, loop=bot.loop)
                     queue.append(song)
                     if len(queue) == 1:
